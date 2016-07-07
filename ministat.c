@@ -7,21 +7,20 @@
  * ----------------------------------------------------------------------------
  *
  */
-#include <sys/ioctl.h>
 
-#include <err.h>
-#include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <math.h>
+#include <err.h>
 #include <string.h>
+#include <stdlib.h>
 #include <unistd.h>
-
+#include <sys/ioctl.h>
 #include "queue.h"
 
 #define NSTUDENT 100
 #define NCONF 6
-double const studentpct[] = { 80, 90, 95, 98, 99, 99.5 };
-double student [NSTUDENT + 1][NCONF] = {
+static double const studentpct[] = { 80, 90, 95, 98, 99, 99.5 };
+static double student[NSTUDENT + 1][NCONF] = {
 /* inf */	{	1.282,	1.645,	1.960,	2.326,	2.576,	3.090  },
 /* 1. */	{	3.078,	6.314,	12.706,	31.821,	63.657,	318.313  },
 /* 2. */	{	1.886,	2.920,	4.303,	6.965,	9.925,	22.327  },
@@ -506,7 +505,7 @@ usage(char const *whine)
 
 	fprintf(stderr, "%s\n", whine);
 	fprintf(stderr,
-	    "Usage: ministat [-C column] [-c confidence] [-d delimiter(s)] [-ns] [-w width] [file [file ...]]\n");
+	    "Usage: ministat [-C column] [-c confidence] [-d delimiter(s)] [-Ans] [-w width] [file [file ...]]\n");
 	fprintf(stderr, "\tconfidence = {");
 	for (i = 0; i < NCONF; i++) {
 		fprintf(stderr, "%s%g%%",
@@ -514,10 +513,10 @@ usage(char const *whine)
 		    studentpct[i]);
 	}
 	fprintf(stderr, "}\n");
+	fprintf(stderr, "\t-A : print statistics only. suppress the graph.\n");
 	fprintf(stderr, "\t-C : column number to extract (starts and defaults to 1)\n");
 	fprintf(stderr, "\t-d : delimiter(s) string, default to \" \\t\"\n");
 	fprintf(stderr, "\t-n : print summary statistics only, no graph/test\n");
-	fprintf(stderr, "\t-q : print summary statistics and test only, no graph\n");
 	fprintf(stderr, "\t-s : print avg/median/stddev bars on separate lines\n");
 	fprintf(stderr, "\t-w : width of graph/test output (default 74 or terminal width)\n");
 	exit (2);
@@ -535,8 +534,8 @@ main(int argc, char **argv)
 	int column = 1;
 	int flag_s = 0;
 	int flag_n = 0;
-	int flag_q = 0;
 	int termwidth = 74;
+	int suppress_plot = 0;
 
 	if (isatty(STDOUT_FILENO)) {
 		struct winsize wsz;
@@ -549,8 +548,11 @@ main(int argc, char **argv)
 	}
 
 	ci = -1;
-	while ((c = getopt(argc, argv, "C:c:d:snqw:")) != -1)
+	while ((c = getopt(argc, argv, "AC:c:d:snw:")) != -1)
 		switch (c) {
+		case 'A':
+			suppress_plot = 1;
+			break;
 		case 'C':
 			column = strtol(optarg, &p, 10);
 			if (p != NULL && *p != '\0')
@@ -575,9 +577,6 @@ main(int argc, char **argv)
 			break;
 		case 'n':
 			flag_n = 1;
-			break;
-		case 'q':
-			flag_q = 1;
 			break;
 		case 's':
 			flag_s = 1;
@@ -612,7 +611,7 @@ main(int argc, char **argv)
 	for (i = 0; i < nds; i++) 
 		printf("%c %s\n", symbol[i+1], ds[i]->name);
 
-	if (!flag_n && !flag_q) {
+	if (!flag_n && !suppress_plot) {
 		SetupPlot(termwidth, flag_s, nds);
 		for (i = 0; i < nds; i++)
 			DimPlot(ds[i]);
