@@ -7,8 +7,9 @@ PKGS =
 
 CFLAGS  += -g -Wall -Werror
 CPPFLAGS+= -I. -D_GNU_SOURCE
-LDFLAGS += -lm
+LIBS     = -lm
 
+DESTDIR =
 PREFIX ?= /usr
 
 # No user serviceable parts below this line.
@@ -18,15 +19,16 @@ PREFIX ?= /usr
 all: $(BIN)
 
 $(BIN): $(OBJS)
-	$(CC) $(OBJS) ${LDFLAGS} -o ${BIN}
+	$(CC) $(OBJS) ${LDFLAGS} -o ${BIN} $(LIBS)
 
 $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
 
 install:
-	install -d $(PREFIX)/bin
-	install -m 0755 $(BIN) $(PREFIX)/bin/$(BIN)
-	install -m 0755 $(MAN) $(PREFIX)/share/man/man1/$(MAN)
+	install -d $(DESTDIR)$(PREFIX)/bin
+	install -d $(DESTDIR)$(PREFIX)/share/man/man1
+	install -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	install -m 0644 $(MAN) $(DESTDIR)$(PREFIX)/share/man/man1/$(MAN)
 
 clean:
 	-rm -rf $(BIN) *.o *.core
