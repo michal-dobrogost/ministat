@@ -1,6 +1,7 @@
 BIN = ministat 
 SRCS= ministat.c
 OBJS= ministat.o
+MAN = ministat.1
 
 PKGS = 
 
@@ -25,6 +26,7 @@ $(OBJS): %.o: %.c
 install:
 	install -d $(PREFIX)/bin
 	install -m 0755 $(BIN) $(PREFIX)/bin/$(BIN)
+	install -m 0755 $(MAN) $(PREFIX)/share/man/man1/$(MAN)
 
 clean:
 	-rm -rf $(BIN) *.o *.core
