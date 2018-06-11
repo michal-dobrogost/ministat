@@ -21,7 +21,7 @@ all: $(BIN)
 $(BIN): $(OBJS)
 	$(CC) $(OBJS) ${LDFLAGS} -o ${BIN} $(LIBS)
 
-$(OBJS): %.o: %.c
+$(OBJS): $(OBJS:.o=.c)
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
 
 install:
@@ -34,5 +34,3 @@ clean:
 	-rm -rf $(BIN) *.o *.core
 
 .PHONY: install clean
-
--include $(DEPS)
