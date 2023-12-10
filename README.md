@@ -1,3 +1,5 @@
+Forked from [github.com/leahneukirchen/ministat](https://github.com/leahneukirchen/ministat).
+
 # ministat
 A small tool to do the statistics legwork on benchmarks etc.
 
