@@ -124,8 +124,11 @@ static double student[NSTUDENT + 1][NCONF] = {
 /* 100. */	{	1.290,	1.660,	1.984,	2.364,	2.626,	3.174  }
 };
 
-#define	MAX_DS	8
-static char symbol[MAX_DS] = { ' ', 'x', '+', '*', '%', '#', '@', 'O' };
+#define	MAX_DS	(8+26)
+static char symbol[MAX_DS] = {
+  ' ', 'x', '+', '*', '%', '#', '@', 'O',
+  'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'
+};
 
 struct dataset {
 	char *name;
@@ -240,7 +243,7 @@ Relative(struct dataset *ds, struct dataset *rs, int confidx)
 	e = t * s;
 
 	if (fabs(d) > e) {
-	
+
 		printf("Difference at %.1f%% confidence\n", studentpct[confidx]);
 		printf("	%g +/- %g\n", d, e);
 		printf("	%g%% +/- %g%%\n", d * 100 / Avg(rs), e * 100 / Avg(rs));
@@ -332,7 +335,7 @@ PlotSet(struct dataset *ds, int val)
 		pl->bar[bar] = malloc(pl->width);
 		memset(pl->bar[bar], 0, pl->width);
 	}
-	
+
 	m = 1;
 	i = -1;
 	j = 0;
@@ -492,7 +495,7 @@ ReadSet(const char *n, int column, const char *delim)
 	if (s->n < 3) {
 		fprintf(stderr,
 		    "Dataset %s must contain at least 3 data points\n", n);
-		exit (2);
+    return NULL;
 	}
 	qsort(s->points, s->n, sizeof *s->points, dbl_cmp);
 	return (s);
@@ -599,16 +602,23 @@ main(int argc, char **argv)
 
 	if (argc == 0) {
 		ds[0] = ReadSet("-", column, delim);
+    if (! ds[0]) {
+      exit(2);
+    }
 		nds = 1;
 	} else {
 		if (argc > (MAX_DS - 1))
 			usage("Too many datasets.");
 		nds = argc;
-		for (i = 0; i < nds; i++)
-			ds[i] = ReadSet(argv[i], column, delim);
+    int dsI = 0;
+		for (i = 0; i < nds; i++) {
+			ds[dsI] = ReadSet(argv[i], column, delim);
+      if (ds[dsI]) { dsI++; }
+    }
+    nds = dsI;
 	}
 
-	for (i = 0; i < nds; i++) 
+	for (i = 0; i < nds; i++)
 		printf("%c %s\n", symbol[i+1], ds[i]->name);
 
 	if (!flag_n && !suppress_plot) {
